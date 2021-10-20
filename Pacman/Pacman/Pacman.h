@@ -24,6 +24,14 @@ private:
 	Vector2* _pacmanPosition;
 	Rect* _pacmanSourceRect;
 	Texture2D* _pacmanTexture;
+	//Constant data for Game Variable
+	const float _cPacmanSpeed;
+
+	//Data For Menu
+	Texture2D* _menuBackGround;
+	Rect* _menuRectangle;
+	Vector2* _menuStringPosition;
+	bool _paused;
 
 	// Data to represent Munchie
 	int _frameCount;
@@ -33,6 +41,16 @@ private:
 
 	// Position for String
 	Vector2* _stringPosition;
+
+	//Boolean to check if true or false for moving through wall
+	bool _wrap = true;
+	bool _isPressed = false;
+
+	//Check key pressed for pause menu
+	bool _pKeyDown;
+
+	//Set variable for Start game
+	bool _startGame;
 
 public:
 	/// <summary> Constructs the Pacman class. </summary>
