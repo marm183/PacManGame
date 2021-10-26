@@ -168,7 +168,8 @@ void Pacman::Draw(int elapsedTime)
 {
 	// Allows us to easily create a string
 	std::stringstream stream;
-	stream << "Pacman X: " << _pacmanPosition->X << " Y: " << _pacmanPosition->Y << " Is Wall Wrap True: " << _wrap;
+	stream << "Pacman X: " << _pacmanPosition->X << " Y: " << _pacmanPosition->Y;
+	stream << " Is wall wrap true: " << _wrap;
 
 	SpriteBatch::BeginDraw(); // Starts Drawing
 	SpriteBatch::Draw(_pacmanTexture, _pacmanPosition, _pacmanSourceRect); // Draws Pacman
@@ -194,8 +195,10 @@ void Pacman::Draw(int elapsedTime)
 	if (_startGame)
 	{
 		std::stringstream menuStream;
+		//Draw string to screen.
 		menuStream << "Press Space to Start Game";
 
+		
 		SpriteBatch::Draw(_menuBackGround, _menuRectangle, nullptr);
 		SpriteBatch::DrawString(menuStream.str().c_str(), _menuStringPosition, Color::Blue);
 	}
