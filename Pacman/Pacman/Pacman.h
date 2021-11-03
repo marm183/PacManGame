@@ -20,12 +20,30 @@ using namespace S2D;
 class Pacman : public Game
 {
 private:
+
+	//Input methods
+	void Input(int elapsedTime, Input::KeyboardState* state);
+
+	//Check methods
+	void CheckPaused(Input::KeyboardState* state, Input::Keys pauseKey);
+	void CheckViewpointCollision();
+
+	//Update method
+	void UpdatePacman(int elapsedTime);
+	void UpdateMunchie(int elapsedTime);
+
 	// Data to represent Pacman
 	Vector2* _pacmanPosition;
 	Rect* _pacmanSourceRect;
 	Texture2D* _pacmanTexture;
 	//Constant data for Game Variable
 	const float _cPacmanSpeed;
+	//Set the direction int for facing pacman
+	int _pacmanDirection;
+	//Set animation int.
+	int _pacmanFrame;
+	int _pacmanCurrentFrameTime;
+	const int _cPacmanFrameTime;
 
 	//Data For Menu
 	Texture2D* _menuBackGround;
@@ -34,10 +52,14 @@ private:
 	bool _paused;
 
 	// Data to represent Munchie
-	int _frameCount;
+	int _munchieFrameCount;
 	Rect* _munchieRect;
-	Texture2D* _munchieBlueTexture;
-	Texture2D* _munchieInvertedTexture;
+	Texture2D* _munchieCombinedTexture;
+	Vector2* _munchiePosition;
+	//Changing the animation to Elapsed time
+	const int _cMunchieTimeFrame;
+	int _munchieFrame;
+	int _munchieCurrentFrameTime;
 
 	// Position for String
 	Vector2* _stringPosition;
@@ -46,7 +68,7 @@ private:
 	bool _wrap = true;
 	bool _isPressed = false;
 
-	//Check key pressed for pause menu
+	//Check key pressed for pause menu.
 	bool _pKeyDown;
 
 	//Set variable for Start game
