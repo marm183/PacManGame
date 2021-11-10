@@ -2,16 +2,19 @@
 
 #include <sstream>
 
-Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.1f), _cPacmanFrameTime(250), _cMunchieTimeFrame(500)
+Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), speedMultiplier(0.1f),  _cPacmanFrameTime(250), _cMunchieTimeFrame(500)
 {
+	//Initilise Member variable
+	_pacman = new Player();
+
 	_munchieFrameCount = 0;
 	//Sets pause menu to false
 	_paused = false;
 	_pKeyDown = false;
 	_startGame = false;
-	_pacmanDirection = 0; //Set the direction of the facing pacman
-	_pacmanCurrentFrameTime = 0; //Set animation frame
-	_pacmanFrame = 0;
+	_pacman->direction = 0; //Set the direction of the facing pacman
+	currentFrameTime = 0; //Set animation frame
+	_pacman->frame = 0;
 
 	//Initialise important Game aspects
 	Graphics::Initialise(argc, argv, this, 1024, 768, false, 25, 25, "Pacman", 60);
@@ -23,8 +26,10 @@ Pacman::Pacman(int argc, char* argv[]) : Game(argc, argv), _cPacmanSpeed(0.1f), 
 
 Pacman::~Pacman()
 {
-	delete _pacmanTexture;
-	delete _pacmanSourceRect;
+	delete _pacman->texture;
+	delete _pacman->sourceRect;
+	delete _pacman->position;
+	delete _pacman;
 	delete _munchieCombinedTexture;
 	delete _munchieRect;
 }
@@ -34,27 +39,27 @@ void Pacman::Input(int elapsedTime, Input::KeyboardState* state)
 	// Checks if D key is pressed
 	if (state->IsKeyDown(Input::Keys::D))
 	{
-		_pacmanPosition->X += _cPacmanSpeed * elapsedTime; //Moves Pacman right on the X axis
-		_pacmanDirection = 0;
+		_pacman->position->X += speedMultiplier * elapsedTime; //Moves Pacman right on the X axis
+		_pacman->direction = 0;
 
 	}
 	// Checks if A key is pressed
 	else if (state->IsKeyDown(Input::Keys::A))
 	{
-		_pacmanPosition->X -= _cPacmanSpeed * elapsedTime; //Moves Pacman left on the X axis
-		_pacmanDirection = 2;
+		_pacman->position->X -= speedMultiplier * elapsedTime; //Moves Pacman left on the X axis
+		_pacman->direction = 2;
 	}
 	// Checks if S key is pressed
 	else if (state->IsKeyDown(Input::Keys::S))
 	{
-		_pacmanPosition->Y += _cPacmanSpeed * elapsedTime; //Moves Pacman Down on the Y axis
-		_pacmanDirection = 1;
+		_pacman->position->Y += speedMultiplier * elapsedTime; //Moves Pacman Down on the Y axis
+		_pacman->direction = 1;
 	}
 	// Checks if W key is pressed
 	else if (state->IsKeyDown(Input::Keys::W))
 	{
-		_pacmanPosition->Y -= _cPacmanSpeed * elapsedTime; //Moves Pacman Up on the Y axis
-		_pacmanDirection = 3;
+		_pacman->position->Y -= speedMultiplier * elapsedTime; //Moves Pacman Up on the Y axis
+		_pacman->direction = 3;
 	}
 
 
@@ -81,6 +86,7 @@ void Pacman::CheckPaused(Input::KeyboardState* state, Input::Keys pauseKey)
 	if (state->IsKeyUp(Input::Keys::P))
 	{
 		_pKeyDown = false;
+		
 	}
 }
 
@@ -89,61 +95,61 @@ void Pacman::CheckViewpointCollision()
 	if (_wrap == true)
 	{
 		// Checks if Pacman is trying to wrap through screen
-		if (_pacmanPosition->X + _pacmanSourceRect->Width > Graphics::GetViewportWidth() + 30) // 1064 is game width
+		if (_pacman->position->X + _pacman->sourceRect->Width > Graphics::GetViewportWidth() + 30) // 1064 is game width
 		{
 			// Pacman hit right wall - Move to other screen
-			_pacmanPosition->X = 0 - _pacmanSourceRect->Width;
+			_pacman->position->X = 0 - _pacman->sourceRect->Width;
 		}
 
 		// Checks if Pacman is trying to wrap through screen
-		if (_pacmanPosition->X + _pacmanSourceRect->Width < 0) // 0 is game width
+		if (_pacman->position->X + _pacman->sourceRect->Width < 0) // 0 is game width
 		{
 			// Pacman hit left wall - Move to other screen
-			_pacmanPosition->X = Graphics::GetViewportWidth() + 30 - _pacmanSourceRect->Width;
+			_pacman->position->X = Graphics::GetViewportWidth() + 30 - _pacman->sourceRect->Width;
 		}
 
 		// Checks if Pacman is trying to wrap through screen
-		if (_pacmanPosition->Y + _pacmanSourceRect->Height > Graphics::GetViewportHeight()) // 765 is game height
+		if (_pacman->position->Y + _pacman->sourceRect->Height > Graphics::GetViewportHeight()) // 765 is game height
 		{
 			// Pacman hit bottom wall - Move to other screen
-			_pacmanPosition->Y = 0 - _pacmanSourceRect->Width;
+			_pacman->position->Y = 0 - _pacman->sourceRect->Width;
 		}
 
 		// Checks if Pacman is trying to wrap through screen
-		if (_pacmanPosition->Y + _pacmanSourceRect->Height < 0) // 0 is game height
+		if (_pacman->position->Y + _pacman->sourceRect->Height < 0) // 0 is game height
 		{
 			// Pacman hit up wall - Move to other screen
-			_pacmanPosition->Y = Graphics::GetViewportHeight() - _pacmanSourceRect->Width;
+			_pacman->position->Y = Graphics::GetViewportHeight() - _pacman->sourceRect->Width;
 		}
 	}
 	else
 	{
 		// Checks if Pacman is trying to dissapear
-		if (_pacmanPosition->X + _pacmanSourceRect->Width > Graphics::GetViewportWidth()) // 1024 is game width
+		if (_pacman->position->X + _pacman->sourceRect->Width > Graphics::GetViewportWidth()) // 1024 is game width
 		{
 			// Pacman hit right wall - Reset his position
-			_pacmanPosition->X = 1024 - _pacmanSourceRect->Width;
+			_pacman->position->X = 1024 - _pacman->sourceRect->Width;
 		}
 
 		// Checks if Pacman is trying to dissapear
-		if (_pacmanPosition->X + _pacmanSourceRect->Width < 32) // 0 is game width
+		if (_pacman->position->X + _pacman->sourceRect->Width < 32) // 0 is game width
 		{
 			// Pacman hit left wall - Reset his position
-			_pacmanPosition->X = 32 - _pacmanSourceRect->Width;
+			_pacman->position->X = 32 - _pacman->sourceRect->Width;
 		}
 
 		// Checks if Pacman is trying to dissapear
-		if (_pacmanPosition->Y + _pacmanSourceRect->Height > Graphics::GetViewportHeight()) // 765 is game height
+		if (_pacman->position->Y + _pacman->sourceRect->Height > Graphics::GetViewportHeight()) // 765 is game height
 		{
 			// Pacman hit bottom wall - Reset his position
-			_pacmanPosition->Y = 765 - _pacmanSourceRect->Width;
+			_pacman->position->Y = 765 - _pacman->sourceRect->Width;
 		}
 
 		// Checks if Pacman is trying to dissapear
-		if (_pacmanPosition->Y + _pacmanSourceRect->Height < 32) // 0 is game height
+		if (_pacman->position->Y + _pacman->sourceRect->Height < 32) // 0 is game height
 		{
 			// Pacman hit up wall - Reset his position
-			_pacmanPosition->Y = 32 - _pacmanSourceRect->Width;
+			_pacman->position->Y = 32 - _pacman->sourceRect->Width;
 		}
 	}
 }
@@ -152,20 +158,20 @@ void Pacman::CheckViewpointCollision()
 void Pacman::UpdatePacman(int elapsedTime)
 {
 	//Set the direction facing of Pacman
-	_pacmanCurrentFrameTime += elapsedTime;
+	currentFrameTime += elapsedTime;
 	//In this code, we are updating the _pacman frame variable by one
-	if (_pacmanCurrentFrameTime > _cPacmanFrameTime)
+	if (currentFrameTime > _cPacmanFrameTime)
 	{
-		_pacmanFrame++;
+		_pacman->frame++;
 
 		//If pacmanFrame is greater then 2, reset pacman to frame to 0
-		if (_pacmanFrame >= 2)
-			_pacmanFrame = 0;
+		if (_pacman->frame >= 2)
+			_pacman->frame = 0;
 
-		_pacmanCurrentFrameTime = 0;
+		currentFrameTime = 0;
 	}
-	_pacmanSourceRect->X = _pacmanSourceRect->Width * _pacmanFrame;
-	_pacmanSourceRect->Y = _pacmanSourceRect->Height * _pacmanDirection;
+	_pacman->sourceRect->X = _pacman->sourceRect->Width * _pacman->frame;
+	_pacman->sourceRect->Y = _pacman->sourceRect->Height * _pacman->direction;
 }
 
 void Pacman::UpdateMunchie(int elapsedTime)
@@ -187,16 +193,23 @@ void Pacman::UpdateMunchie(int elapsedTime)
 void Pacman::LoadContent()
 {
 	// Load Pacman
-	_pacmanTexture = new Texture2D();
-	_pacmanTexture->Load("Textures/Pacman.tga", false);
-	_pacmanPosition = new Vector2(350.0f, 350.0f);
-	_pacmanSourceRect = new Rect(0.0f, 0.0f, 32, 32);
+	_pacman->texture = new Texture2D();
+	_pacman->texture->Load("Textures/Pacman.tga", false);
+	_pacman->position = new Vector2(350.0f, 350.0f);
+	_pacman->sourceRect = new Rect(0.0f, 0.0f, 32, 32);
 
 	// Load Munchie
 	_munchieCombinedTexture = new Texture2D();
 	_munchieCombinedTexture->Load("Textures/MunchieCombined.png", true);
 	_munchiePosition = new Vector2(100.0f, 100.0f);
 	_munchieRect = new Rect(0.0f, 0.0f, 12, 12);
+	_munchieCurrentFrameTime = 0;
+
+	//Load Cherry
+	_cherryCombinedTexture = new Texture2D();
+	_cherryCombinedTexture->Load("Textures/CherryMerged.png", true);
+	_cherryPosition = new Vector2(200.0f, 200.0f);
+	_cherryRect = new Rect(0.0f, 0.0f, 64, 32);
 	_munchieCurrentFrameTime = 0;
 
 	// Set string position
@@ -239,20 +252,23 @@ void Pacman::Draw(int elapsedTime)
 {
 	// Allows us to easily create a string
 	std::stringstream stream;
-	stream << "Pacman X: " << _pacmanPosition->X << " Y: " << _pacmanPosition->Y;
+	stream << "Pacman X: " << _pacman->position->X << " Y: " << _pacman->position->Y;
 	stream << " Is wall wrap true: " << _wrap;
 
 	SpriteBatch::BeginDraw(); // Starts Drawing
-	SpriteBatch::Draw(_pacmanTexture, _pacmanPosition, _pacmanSourceRect); // Draws Pacman
+	SpriteBatch::Draw(_pacman->texture, _pacman->position, _pacman->sourceRect); // Draws Pacman
 	SpriteBatch::Draw(_munchieCombinedTexture, _munchiePosition, _munchieRect);//Draws munchie
+	SpriteBatch::Draw(_cherryCombinedTexture, _cherryPosition, _cherryRect);//Draws Cherry
 
 	if (_munchieFrameCount == 0)
 	{
 		_munchieRect->X = 12;
+		_cherryRect->X = 64;
 	}
 	else
 	{
 		_munchieRect->X = 24;
+		_cherryRect->X = 32;
 	}
 
 	//Start Game Menu
