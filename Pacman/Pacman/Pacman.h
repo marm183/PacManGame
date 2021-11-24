@@ -7,6 +7,8 @@
 		#pragma comment(linker, "/SUBSYSTEM:windows /ENTRY:mainCRTStartup")
 	#endif
 #endif
+#define MUNCHIECOUNT 50 //Defining how a macro for how many Munchies on screen
+#define GHOSTCOUNT 1 //Defining a macro for how many ghosts on screen
 
 // Just need to include main header file
 #include "S2D/S2D.h"
@@ -17,11 +19,37 @@ using namespace S2D;
 //Structure Definition
 struct Player
 {
+	bool dead;
 	int direction;
 	int frame;
+	float speedBoost;
 	Rect* sourceRect;
 	Texture2D* texture;
 	Vector2* position;
+};
+
+struct MovingEnemy
+{
+	Vector2* position;
+	Texture2D* texture;
+	Rect* sourceRect;
+	int direction;
+	float speed;
+};
+
+struct Enemy
+{
+	
+	Rect* _munchieRect;
+	Texture2D* _munchieCombinedTexture;
+	Vector2* _munchiePosition;
+};
+
+struct Cherry
+{
+	Rect* _cherryRect;
+	Texture2D* _cherryCombinedTexture;
+	Vector2* _cherryPosition;
 };
 
 // Declares the Pacman class which inherits from the Game class.
@@ -32,15 +60,18 @@ class Pacman : public Game
 private:
 
 	//Input methods
-	void Input(int elapsedTime, Input::KeyboardState* state);
+	void Input(int elapsedTime, Input::KeyboardState* state, Input::MouseState* mouseState);
 
 	//Check methods
 	void CheckPaused(Input::KeyboardState* state, Input::Keys pauseKey);
 	void CheckViewpointCollision();
+	void CheckGhostCollisions();
+	void UpdateGhost(MovingEnemy*, int elapsedTime);
 
 	//Update method
 	void UpdatePacman(int elapsedTime);
 	void UpdateMunchie(int elapsedTime);
+	void UpdateCherry(int elapsedTime);
 
 
 	// Data to represent Pacman
@@ -48,8 +79,6 @@ private:
 	float speedMultiplier;
 	int currentFrameTime;
 	const int _cPacmanFrameTime;
-	
-
 
 	//Data For Menu
 	Texture2D* _menuBackGround;
@@ -58,22 +87,22 @@ private:
 	bool _paused;
 
 	// Data to represent Munchie
+	Enemy* _munchie[MUNCHIECOUNT];
 	int _munchieFrameCount;
-	Rect* _munchieRect;
-	Texture2D* _munchieCombinedTexture;
-	Vector2* _munchiePosition;
+	int _munchieCurrentFrameTime;
+
+	//Data to represent moving enemy
+	MovingEnemy* _ghosts[GHOSTCOUNT];
 
 	//Data to represented Cherry
-		// Data to represent Munchie
+	Cherry* _cherry;
 	int _cherryFrameCount;
-	Rect* _cherryRect;
-	Texture2D* _cherryCombinedTexture;
-	Vector2* _cherryPosition;
+	int _cherryCurrentFrameTime;
 
 	//Changing the animation to Elapsed time
 	const int _cMunchieTimeFrame;
 	int _munchieFrame;
-	int _munchieCurrentFrameTime;
+	
 
 	// Position for String
 	Vector2* _stringPosition;
@@ -104,17 +133,3 @@ public:
 	/// <summary> Called every frame - draw game here. </summary>
 	void virtual Draw(int elapsedTime);
 };
-
-/*
-	Vector2* _pacmanPosition;
-	Rect* _pacmanSourceRect;
-	Texture2D* _pacmanTexture;
-	//Constant data for Game Variable
-	const float _cPacmanSpeed;
-	//Set the direction int for facing pacman
-	int _pacmanDirection;
-	//Set animation int.
-	int _pacmanFrame;
-	int _pacmanCurrentFrameTime;
-	const int _cPacmanFrameTime;
-*/
